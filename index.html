@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI Personality Test</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4e1d2;
+            color: #4a4a4a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        .container {
+            background-color: #fffcf7;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 {
+            color: #ff9999;
+            font-size: 2em;
+        }
+        .question, .result {
+            margin: 20px 0;
+            font-size: 1.1em;
+        }
+        .options button {
+            background-color: #b2ebf2;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .options button:hover {
+            background-color: #80deea;
+        }
+        .result-section {
+            display: none;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MBTI人格测试</h1>
+        <div class="question" id="question"></div>
+        <div class="options" id="options"></div>
+        <div class="result-section" id="result"></div>
+    </div>
+
+    <script>
+        const questions = [
+            { text: "你更喜欢在人群中社交，还是独处思考？", options: ["人群中社交", "独处思考"], type: "E/I" },
+            { text: "你更倾向于关注具体细节，还是想象未来可能性？", options: ["具体细节", "未来可能性"], type: "S/N" },
+            { text: "在做决定时，你更看重逻辑分析，还是情感因素？", options: ["逻辑分析", "情感因素"], type: "T/F" },
+            { text: "你更喜欢有计划的生活，还是随遇而安？", options: ["有计划", "随遇而安"], type: "J/P" },
+            { text: "你更享受即兴活动，还是结构化安排？", options: ["即兴活动", "结构化安排"], type: "J/P" },
+            { text: "你更擅长处理现实问题，还是探索抽象概念？", options: ["现实问题", "抽象概念"], type: "S/N" },
+            { text: "在团队中，你更倾向于领导还是支持？", options: ["领导", "支持"], type: "E/I" },
+            { text: "你更看重客观事实，还是个人价值观？", options: ["客观事实", "个人价值观"], type: "T/F" }
+        ];
+
+        let currentQuestion = 0;
+        let scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+
+        function loadQuestion() {
+            if (currentQuestion < questions.length) {
+                document.getElementById('question').textContent = questions[currentQuestion].text;
+                const optionsDiv = document.getElementById('options');
+                optionsDiv.innerHTML = '';
+                questions[currentQuestion].options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.onclick = () => handleAnswer(index);
+                    optionsDiv.appendChild(button);
+                });
+            } else {
+                showResult();
+            }
+        }
+
+        function handleAnswer(index) {
+            const { type, options } = questions[currentQuestion];
+            scores[type[0]] += (index === 0) ? 1 : 0;
+            scores[type[1]] += (index === 1) ? 1 : 0;
+            currentQuestion++;
+            loadQuestion();
+        }
+
+        function showResult() {
+            const mbti = [
+                scores.E > scores.I ? 'E' : 'I',
+                scores.S > scores.N ? 'S' : 'N',
+                scores.T > scores.F ? 'T' : 'F',
+                scores.J > scores.P ? 'J' : 'P'
+            ].join('');
+
+            let resultText = `<h2>你的MBTI结果：${mbti}</h2>`;
+            resultText += `<p><strong>适合的伴侣：</strong> ${getPartner(mbti)}</p>`;
+            resultText += `<p><strong>适合的工作：</strong> ${getCareer(mbti)}</p>`;
+            resultText += `<p><strong>适合的朋友：</strong> ${getFriend(mbti)}</p>`;
+            resultText += `<p><strong>缺点：</strong> ${getWeaknesses(mbti)}</p>`;
+            resultText += `<p><strong>改正建议：</strong> ${getImprovement(mbti)}</p>`;
+            resultText += `<img src="https://via.placeholder.com/300x200?text=${mbti}+Image" alt="${mbti} 形象">`;
+
+            document.getElementById('question').style.display = 'none';
+            document.getElementById('options').style.display = 'none';
+            document.getElementById('result').innerHTML = resultText;
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function getPartner(mbti) {
+            const partners = {
+                'INFP': 'ENFJ 或 ESFJ（温暖支持型）',
+                'ENFP': 'INFJ 或 INTJ（深思熟虑型）',
+                'INFJ': 'ENFP 或 ENTP（活泼创意型）',
+                'ENFJ': 'INFP 或 ISFP（敏感体贴型）',
+                'INTJ': 'ENTP 或 ENFP（充满活力型）',
+                'ENTJ': 'INTP 或 ISFP（冷静理性型）',
+                'INTP': 'ENTJ 或 ESTJ（果断领导型）',
+                'ENTP': 'INFJ 或 INTJ（深邃智慧型）',
+                'ISTJ': 'ESFP 或 ESTP（务实行动型）',
+                'ESTJ': 'ISTP 或 INTP（技术型）',
+                'ISTP': 'ESTJ 或 ESFJ（组织型）',
+                'ESTP': 'ISTJ 或 ISFJ（稳定型）',
+                'ISFJ': 'ESFP 或 ENFJ（热情型）',
+                'ESFJ': 'ISFP 或 ISTJ（踏实型）',
+                'ISFP': 'ENFJ 或 ESFP（艺术型）',
+                'ESFP': 'ISFJ 或 ISTP（实用型）'
+            };
+            return partners[mbti] || '兼容多种类型，建议探索！';
+        }
+
+        function getCareer(mbti) {
+            const careers = {
+                'INFP': '作家、心理咨询师',
+                'ENFP': '市场营销、创业者',
+                'INFJ': '教育家、社会工作者',
+                'ENFJ': '人力资源经理、培训师',
+                'INTJ': '战略规划师、工程师',
+                'ENTJ': '企业管理者、项目经理',
+                'INTP': '研究员、数据分析师',
+                'ENTP': '创新者、产品设计师',
+                'ISTJ': '会计、行政人员',
+                'ESTJ': '运营总监、律师',
+                'ISTP': '机械师、程序员',
+                'ESTP': '销售代表、活动策划',
+                'ISFJ': '护士、教师',
+                'ESFJ': '客服经理、活动协调',
+                'ISFP': '艺术家、设计师',
+                'ESFP': '表演者、公关专员'
+            };
+            return careers[mbti] || '多种职业可尝试！';
+        }
+
+        function getFriend(mbti) {
+            const friends = {
+                'INFP': 'ENFP、INFJ（共鸣型）',
+                'ENFP': 'INFP、ENTP（创意型）',
+                'INFJ': 'ENFJ、INTP（深思型）',
+                'ENFJ': 'ESFJ、ISFJ（温暖型）',
+                'INTJ': 'ENTJ、INTP（理性型）',
+                'ENTJ': 'ESTJ、ENTP（领导型）',
+                'INTP': 'INTJ、ENTP（探索型）',
+                'ENTP': 'ENFP、INTP（活泼型）',
+                'ISTJ': 'ESTJ、ISFJ（稳定型）',
+                'ESTJ': 'ISTJ、ENTJ（务实型）',
+                'ISTP': 'ESTP、ISFP（行动型）',
+                'ESTP': 'ISTP、ESFP（冒险型）',
+                'ISFJ': 'ESFJ、ISFP（关怀型）',
+                'ESFJ': 'ENFJ、ISFJ（社交型）',
+                'ISFP': 'ESFP、INFP（艺术型）',
+                'ESFP': 'ESTP、ISFP（热情型）'
+            };
+            return friends[mbti] || '多种朋友类型皆宜！';
+        }
+
+        function getWeaknesses(mbti) {
+            const weaknesses = {
+                'INFP': '过于理想化，容易逃避冲突',
+                'ENFP': '缺乏专注，容易分心',
+                'INFJ': '过度敏感，倾向完美主义',
+                'ENFJ': '过于在意他人意见，忽视自我',
+                'INTJ': '过于自信，忽视细节',
+                'ENTJ': '强势，难以妥协',
+                'INTP': '拖延，理论多于实践',
+                'ENTP': '缺乏耐心，易放弃',
+                'ISTJ': '过于传统，抗拒变化',
+                'ESTJ': '过于直接，忽视情感',
+                'ISTP': '不善表达，孤立倾向',
+                'ESTP': '冲动，缺乏长远规划',
+                'ISFJ': '过度奉献，忽视自我',
+                'ESFJ': '依赖他人认可，抗压差',
+                'ISFP': '优柔寡断，逃避责任',
+                'ESFP': '缺乏深度，注重即时享乐'
+            };
+            return weaknesses[mbti] || '需要更多观察！';
+        }
+
+        function getImprovement(mbti) {
+            const improvements = {
+                'INFP': '学会直面冲突，设定现实目标',
+                'ENFP': '制定计划，提升专注力',
+                'INFJ': '接受不完美，减轻压力',
+                'ENFJ': '平衡他人与自我需求',
+                'INTJ': '关注细节，倾听他人',
+                'ENTJ': '培养共情，学会妥协',
+                'INTP': '付诸行动，避免拖延',
+                'ENTP': '坚持到底，增强耐心',
+                'ISTJ': '尝试新事物，适应变化',
+                'ESTJ': '注重情感沟通，柔化态度',
+                'ISTP': '主动表达，融入团队',
+                'ESTP': '制定长期目标，减少冲动',
+                'ISFJ': '关注自我需求，设定边界',
+                'ESFJ': '建立自信，增强抗压能力',
+                'ISFP': '果断决策，承担责任',
+                'ESFP': '深入思考，平衡享乐与成长'
+            };
+            return improvements[mbti] || '多尝试新方法！';
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
